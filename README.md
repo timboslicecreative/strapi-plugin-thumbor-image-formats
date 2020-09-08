@@ -14,7 +14,12 @@ Using npm
 
 ```bash
 npm install --save strapi-plugin-thumbor-image-formats
-npm run build
+```
+
+Using Yarn
+
+```bash
+yarn add strapi-plugin-thumbor-image-formats
 ```
 
 ## Setup
@@ -23,6 +28,8 @@ The _upload_ and  _image-manipulation_ services of the _upload_ plugin need to b
  redirecting to this plugin. You can use the installed script `create-thumbor-image-formats-overrides` 
  to create these files or manually add the files `upload.js` and `image-manipulation.js` to
  the `extensions/upload/services/` folder.
+ 
+Remember to build Strapi after adding the overrides. e.g. using npm `npm build` or yarn `yarn build`
 
 ### Using the script to create overrides
 
@@ -57,7 +64,43 @@ const {services} = require("strapi-plugin-thumbor-image-formats");
 module.exports = services.ImageManipulation;
 ```
 
+### Rebuild Strapi
+
+After the overrides are created you'll need to rebuild strapi.
+
+Using npm
+
+```bash
+npm run build
+```
+
+Using Yarn
+
+```bash
+yarn build
+```
+
 ## Configuration
+
+### Thumbor server
+
+Thumbor server settings are taken from the host environment variables. 
+You need to provide a public url, private url and the key used for HMAC.
+
+1. `THUMBOR_PUBLIC_URL` is the public facing url of the thumbor server, used in the formats urls.
+2. `THUMBOR_PRIVATE_URL` is the private url used by the plugin behind the scenes to pre-fetch the formats to get their 
+calculated height and file size. If you want your Strapi server to use the public url of the thumbor server, repeat it here.
+3. `THUMBOR_KEY` is the security key used by thumbor for generating HMAC keys for image requests to prevent url tampering. Currently unsafe image access is not supported.
+
+e.g.
+
+```
+THUMBOR_PUBLIC_URL=http://thumbor.domain.com:3001
+THUMBOR_PRIVATE_URL=http://thumbor:8000
+THUMBOR_KEY=abcdefghijklmnopqrstuvwxyz123
+```
+
+### Formats
 
 By default, only _thumbnail_ and _small_ image formats are created as the Strapi admin UI uses these
 to show uploaded images. It is implied you would request other variants directly from the thumbor server. 
