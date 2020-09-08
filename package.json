@@ -1,0 +1,36 @@
+{
+  "name": "strapi-plugin-thumbor-image-formats",
+  "version": "0.1.0",
+  "description": "Overrides upload of thumbnails and formats to use a thumbor server instead",
+  "author": {
+    "name": "Timbo Slice Creative",
+    "url": "https://github.com/timboslicecreative"
+  },
+  "license": "MIT",
+  "strapi": {
+    "name": "Thumbor Image Formats",
+    "icon": "images",
+    "description": "Thumbor image formats for uploaded images"
+  },
+  "keywords": [
+    "strapi",
+    "plugin",
+    "thumbor",
+    "image"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/timboslicecreative/strapi-plugin-thumbor-image-formatst"
+  },
+  "homepage": "https://github.com/timboslicecreative/strapi-plugin-thumbor-image-formats",
+  "bugs": {
+    "url": "https://github.com/timboslicecreative/strapi-plugin-thumbor-image-formats/issues"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "create-thumbor-image-formats-overrides": "./bin/cli.js"
+  },
+  "main": "lib/index.js"
+}
