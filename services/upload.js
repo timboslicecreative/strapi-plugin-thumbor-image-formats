@@ -1,7 +1,6 @@
 'use strict';
 
-
-async function createFormats(file){
+async function createFormats(file) {
     const {
         generateThumbnail,
         generateFormats,
@@ -55,8 +54,6 @@ async function replace(id, {data, file}) {
     return this.update({id}, fileData);
 }
 
-
-//TODO: fix deleting, it tries to use the upload provider to delete each format.
 
 module.exports = {
     ...strapi.plugins.upload,
