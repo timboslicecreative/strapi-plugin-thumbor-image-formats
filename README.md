@@ -33,12 +33,12 @@ Remember to build Strapi after adding the overrides. e.g. using npm `npm build` 
 
 ### Using the script to create overrides
 
-Use the `create-thumbor-image-formats-overrides` script from the root directory of your strapi project.
+Use the `strapi-plugin-thumbor-image-formats create-overrides` command from the root directory of your strapi project.
 
 **Warning**: This will replace existing files `upload.js` and `image-manipulation.js` in `extensions/upload/services/`.
 
 ```bash
-create-thumbor-image-formats-overrides
+strapi-plugin-thumbor-image-formats create-overrides
 
 > Copying upload.js to /usr/src/app/extensions/upload/services/upload.js
 > Copying image-manipulation.js to /usr/src/app/extensions/upload/services/image-manipulation.js
@@ -87,10 +87,10 @@ yarn build
 Thumbor server settings are taken from the host environment variables. 
 You need to provide a public url, private url and the key used for HMAC.
 
-1. `THUMBOR_PUBLIC_URL` is the public facing url of the thumbor server, used in the formats urls.
-2. `THUMBOR_PRIVATE_URL` is the private url used by the plugin behind the scenes to pre-fetch the formats to get their 
+* `THUMBOR_PUBLIC_URL` is the public facing url of the thumbor server, used in the formats urls.
+* `THUMBOR_PRIVATE_URL` is the private url used by the plugin behind the scenes to pre-fetch the formats to get their 
 calculated height and file size. If you want your Strapi server to use the public url of the thumbor server, repeat it here.
-3. `THUMBOR_KEY` is the security key used by thumbor for generating HMAC keys for image requests to prevent url tampering. Currently unsafe image access is not supported.
+* `THUMBOR_KEY` is the security key used by thumbor for generating HMAC keys for image requests to prevent url tampering. Currently unsafe image access is not supported.
 
 e.g.
 

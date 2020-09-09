@@ -20,7 +20,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/timboslicecreative/strapi-plugin-thumbor-image-formatst"
+    "url": "https://github.com/timboslicecreative/strapi-plugin-thumbor-image-formatst.git"
   },
   "homepage": "https://github.com/timboslicecreative/strapi-plugin-thumbor-image-formats",
   "bugs": {
@@ -29,8 +29,6 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "bin": {
-    "create-thumbor-image-formats-overrides": "./bin/cli.js"
-  },
+  "bin": "./bin/cli.js",
   "main": "lib/index.js"
 }
