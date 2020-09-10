@@ -84,77 +84,135 @@ yarn build
 
 ### Thumbor server
 
-Thumbor server settings are taken from the host environment variables. 
-You need to provide a public url, private url and the key used for HMAC.
+You need to provide a public url, private url for the thumbor server and an optional thumbor security key
+It is highly recommended you use HMAC security with your thumbor server.
 
-* `THUMBOR_PUBLIC_URL` is the public facing url of the thumbor server, used in the formats urls.
-* `THUMBOR_PRIVATE_URL` is the private url used by the plugin behind the scenes to pre-fetch the formats to get their 
+* `thumborHostPublic` is the public facing url of the thumbor server, used in the formats urls.
+* `thumborHostPrivate` is the private url used by the plugin behind the scenes to pre-fetch the formats to get their 
 calculated height and file size. If you want your Strapi server to use the public url of the thumbor server, repeat it here.
-* `THUMBOR_KEY` is the security key used by thumbor for generating HMAC keys for image requests to prevent url tampering. Currently unsafe image access is not supported.
+* `thumborSecurityKey` is the security key used by thumbor for generating HMAC keys for image requests to prevent url 
+tampering. Without this setting thumbor 'unsafe' urls will be used.
 
-e.g.
+Thumbor configuration example:
 
+```javascript
+// config/plugins.js 
+
+module.exports = ({env}) => ({
+    thumborImageFormats: {
+        thumborHostPublic: 'https://thumbor.mydomain.com',
+        thumborHostPrivate: 'http://server-thumbor:8000',
+        // optional security key
+        thumborSecurityKey: 'abcdefghijklmnopqrstuvwxyz123',
+        // ...
+    }
+})
 ```
-THUMBOR_PUBLIC_URL=http://thumbor.domain.com:3001
-THUMBOR_PRIVATE_URL=http://thumbor:8000
+
+It's highly recommended that you store your configuration in the host environment variables.
+
+```dotenv
+# Host environment variables
+
+THUMBOR_PUBLIC_URL=https://thumbor.mydomain.com
+THUMBOR_PRIVATE_URL=http://server-thumbor:8000
 THUMBOR_KEY=abcdefghijklmnopqrstuvwxyz123
 ```
+```javascript
+// config/plugins.js
+
+module.exports = ({env}) => ({
+    thumborImageFormats: {
+        thumborHostPublic: process.env.THUMBOR_PUBLIC_URL,
+        thumborHostPrivate: process.env.THUMBOR_PRIVATE_URL,
+        thumborSecurityKey: process.env.THUMBOR_KEY,
+        // ...
+    }
+})
+```
+
+### Local file upload provider
+
+If you are using a local file upload provider, like the default used by Strapi's upload plugin, you 
+need to specify a host for thumbor to retrieve the images from. You do so by setting the `localFileHost`
+property in the plugin config. This host needs to be accessible from your thumbor server.
+
+```javascript
+module.exports = ({env}) => ({
+    thumborImageFormats: {
+        // ...
+        localFileHost: 'http://strapi.mydomain:1337',
+        // ...
+    }
+})
+```
+
 
 ### Formats
 
-By default, only _thumbnail_ and _small_ image formats are created as the Strapi admin UI uses these
-to show uploaded images. It is implied you would request other variants directly from the thumbor server. 
-However, you can alter these defaults and add extra formats via Strapi's plugin config file `config/plugins.js`
+By default, __thumbnail__ and __small__, __medium__, __large__ image formats are created in line with Strapi's default
+formats. However, only __thumbnail__ and __small__ are required for the admin to show the resized images. 
 
+If you do not use the additional formats it is recommended to overwrite the formats in the plugin configuration to reduce
+the amount of formats held in the Thumbor servers cache/result storage. 
 
-Plugin configuration will override defaults, so you should include the _thumbnail_ and the _small_ format
+You can override the defaults and add extra formats via Strapi's plugin config file `config/plugins.js`. 
+When defining a format you need to specify the `key` and its `settings`. 
+
+* `key` is the property the format will be stored on the original image upload object
+* `settings` are the image manipulation settings supported by thumbor. These are passed to the [thurl](https://www.npmjs.com/package/thurl) 
+thumbor url generator. To see available options read the package documentation at [https://www.npmjs.com/package/thurl](https://www.npmjs.com/package/thurl).
+
+**Note:** Plugin configuration will override defaults, so you should include the _thumbnail_ and the _small_ formats
 to show these formats in the Strapi admin.
 
-**Currently, the only supported thumbor property is _width_.**
+override default sizes:
 
-e.g. override default sizes
-
-```
+```javascript
 module.exports = ({env}) => ({
     thumborImageFormats: {
+        // ... 
         thumbnail: {
             key: "thumbnail",
-            prefix: "thumbnail_",
-            width: 245,
+            settings: {width: 245, quality: 80},
         },
         formats: [{
             key: "small",
-            prefix: "small_",
-            width: 520,
+            settings: {width: 520},
         }]
     }
 });
 ```
 
-e.g. add extra formats
-```
+add extra formats:
+```javascript
 module.exports = ({env}) => ({
     thumborImageFormats: {
+        // ...
         thumbnail: {
             key: "thumbnail",
-            prefix: "thumbnail_",
             width: 245,
         },
         formats: [
             {
                 key: "small",
-                prefix: "small_",
-                width: 520,
+                settings: { width: 520}
             },
             {
                 key: "medium",
-                prefix: "medium_",
-                width: 720,
+                settings: {width: 720}
             },
             {
                 key: "large",
-                prefix: "large_",
-                width: 1080,
+                setting: {width: 1080}
+            },
+            {
+                key: "grayscale",
+                setting: {width: 1080, grayscale: ''}
+            },
+            {
+                key: "blured",
+                setting: {width: 1080, blur: [25,50]}
             },
         ]
     }

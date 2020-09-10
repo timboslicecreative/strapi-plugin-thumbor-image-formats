@@ -1,48 +1,53 @@
 const sharp = require('sharp');
 const request = require("request");
-const {thumborUrl} = require("../lib/thumbor");
-
-const FORMATS = [
-    {
-        key: "small",
-        prefix: "small_",
-        width: 520,
-    },
-    {
-        key: "medium",
-        prefix: "medium_",
-        width: 960,
-    },
-    {
-        key: "large",
-        prefix: "large_",
-        width: 1280,
-    },
-];
+const Thurl = require("thurl");
 
 const THUMBNAIL = {
-    key: "thumbnail",
-    prefix: "thumbnail_",
-    width: 245,
+    key: "thumbnail", settings: {width: 245, quality: 90}
+}
+const FORMATS = [
+    {key: "small", settings: {width: 520}},
+    {key: "medium", settings: {width: 960}},
+    {key: "large", settings: {width: 1280}}
+];
+
+let thurlPrivate = null;
+let thurlPublic = null;
+let fileUrl = null;
+
+const hasConfig = () => strapi.config && strapi.config.plugins && strapi.config.plugins.hasOwnProperty('thumborImageFormats');
+const getConfig = () => hasConfig() ? strapi.config.plugins.thumborImageFormats : {};
+
+const configureThurl = () => {
+    if (!thurlPublic || !thurlPrivate) {
+        const {thumborHostPrivate, thumborHostPublic, thumborSecurityKey} = getConfig();
+        if (thumborHostPrivate && thumborHostPublic) {
+            thurlPublic = new Thurl(thumborHostPublic, thumborSecurityKey);
+            thurlPrivate = new Thurl(thumborHostPrivate, thumborSecurityKey);
+        }
+    }
+    return {thurlPublic, thurlPrivate};
 }
 
-const hasConfig = () => {
-    console.log('plugins', strapi.plugins, 'config', strapi.config);
-    return strapi.config && strapi.config.plugins && strapi.config.plugins.hasOwnProperty('thumborImageFormats')
+const configureFileUrl = () => {
+    if (!fileUrl) {
+        const {localFileHost} = getConfig();
+        fileUrl = localFileHost ? (url) => `${localFileHost}${url}` : (url) => url
+    }
+    return fileUrl;
 }
 
-const getFormats = () => (
-    hasConfig() && strapi.config.plugins.thumborImageFormats.hasOwnProperty('formats') ?
-        strapi.config.plugins.thumborImageFormats.formats : FORMATS
-)
+const getFormats = () => {
+    const {formats} = getConfig();
+    return formats || FORMATS;
+}
 
-const getThumbnailFormat = () => (
-    hasConfig() && strapi.config.plugins.thumborImageFormats.hasOwnProperty('thumbnail') ?
-        strapi.config.plugins.thumborImageFormats.formats : THUMBNAIL
-)
+const getThumbnailFormat = () => {
+    const {thumbnail} = getConfig();
+    return thumbnail || THUMBNAIL;
+}
 
 const getMetadata = buffer => sharp(buffer).metadata();
-
 const getMetadataFromUrl = url => new Promise((resolve, reject) => {
     request({url, encoding: null}, (err, resp, buffer) => {
         if (err) return reject(err)
@@ -50,20 +55,21 @@ const getMetadataFromUrl = url => new Promise((resolve, reject) => {
     });
 });
 
-const makeFormat = async (file, {prefix, width}) => {
-    const publicUrl = thumborUrl(file.url, {width: width}, true);
-    const privateUrl = thumborUrl(file.url, {width: width}, false);
+const makeFormat = async (file, {settings}) => {
+    const {thurlPublic, thurlPrivate} = configureThurl();
+    const fileUrl = configureFileUrl();
+    const publicUrl = thurlPublic.build(fileUrl(file.url), settings);
+    const privateUrl = thurlPrivate.build(fileUrl(file.url), settings);
     const metadata = await getMetadataFromUrl(privateUrl)
     return {
-        name: `${prefix}${file.name}`,
-        hash: `${prefix}${file.hash}`,
+        name: file.name,
+        hash: file.hash,
         ext: file.ext,
         mime: file.mime,
         width: metadata.width,
         height: metadata.height,
         size: metadata.size,
         url: publicUrl,
-        privateUrl: privateUrl,
     };
 }
 
@@ -79,7 +85,6 @@ const generateFormats = (file) => Promise.all(
     for (let i in formats) formatObject[formats[i].key] = formats[i].file
     return formatObject;
 });
-
 
 const generateThumbnail = (file) => makeFormat(file, getThumbnailFormat());
 
