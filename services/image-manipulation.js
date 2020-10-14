@@ -2,6 +2,10 @@ const sharp = require('sharp');
 const request = require("request");
 const Thurl = require("thurl");
 
+const ALLOWED_FORMATS = [
+    'jpeg', 'png', 'webp', 'tiff',
+];
+
 const THUMBNAIL = {
     key: "thumbnail", settings: {width: 245, quality: 90}
 }
@@ -47,7 +51,7 @@ const getThumbnailFormat = () => {
     return thumbnail || THUMBNAIL;
 }
 
-const getMetadata = buffer => sharp(buffer).metadata();
+const getMetadata = buffer => sharp(buffer).metadata().catch(()=>({})); // need catch to ignore errors
 const getMetadataFromUrl = url => new Promise((resolve, reject) => {
     request({url, encoding: null}, (err, resp, buffer) => {
         if (err) return reject(err)
@@ -73,20 +77,31 @@ const makeFormat = async (file, {settings}) => {
     };
 }
 
-const generateFormats = (file) => Promise.all(
-    getFormats().map(description =>
-        makeFormat(file, description).then(format => ({
-            key: description.key,
-            file: format
-        }))
-    )
-).then(formats => {
-    const formatObject = {};
-    for (let i in formats) formatObject[formats[i].key] = formats[i].file
-    return formatObject;
-});
+const generateFormats = async (file) => {
+    if (!(await isAllowedFormat(file.buffer))) return null;
+    else return Promise.all(
+        getFormats().map(description =>
+            makeFormat(file, description).then(format => ({
+                key: description.key,
+                file: format
+            }))
+        )
+    ).then(formats => {
+        const formatObject = {};
+        for (let i in formats) formatObject[formats[i].key] = formats[i].file
+        return formatObject;
+    });
+}
 
-const generateThumbnail = (file) => makeFormat(file, getThumbnailFormat());
+const generateThumbnail = async (file) => {
+    if (!(await isAllowedFormat(file.buffer))) return null;
+    else return makeFormat(file, getThumbnailFormat());
+}
+
+const isAllowedFormat = async buffer => {
+    const {format} = await getMetadata(buffer);
+    return format && ALLOWED_FORMATS.includes(format.toLowerCase());
+};
 
 module.exports = {
     generateFormats,
