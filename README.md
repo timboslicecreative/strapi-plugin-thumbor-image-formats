@@ -123,9 +123,9 @@ THUMBOR_KEY=abcdefghijklmnopqrstuvwxyz123
 
 module.exports = ({env}) => ({
     thumborImageFormats: {
-        thumborHostPublic: process.env.THUMBOR_PUBLIC_URL,
-        thumborHostPrivate: process.env.THUMBOR_PRIVATE_URL,
-        thumborSecurityKey: process.env.THUMBOR_KEY,
+        thumborHostPublic: env('THUMBOR_PUBLIC_URL'),
+        thumborHostPrivate: env('THUMBOR_PRIVATE_URL'),
+        thumborSecurityKey: env('THUMBOR_KEY'),
         // ...
     }
 })

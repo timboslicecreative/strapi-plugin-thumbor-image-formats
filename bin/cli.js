@@ -7,7 +7,7 @@ function createOverrides() {
     const sourcePath = path.join(process.cwd(), 'node_modules', 'strapi-plugin-thumbor-image-formats', 'overrides');
     const targetPath = path.join(process.cwd(), 'extensions', 'upload', 'services');
 
-    const uploadFile = 'Upload.js';
+    const uploadFile = 'upload.js';
     const uploadSource = path.join(sourcePath, uploadFile);
     const uploadTarget = path.join(targetPath, uploadFile);
 

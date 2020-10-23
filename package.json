@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-thumbor-image-formats",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Overrides upload of thumbnails and formats to use a thumbor server instead",
   "author": {
     "name": "Timbo Slice Creative",
