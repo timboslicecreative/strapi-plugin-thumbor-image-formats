@@ -38,7 +38,7 @@ Use the `strapi-plugin-thumbor-image-formats create-overrides` command from the 
 **Warning**: This will replace existing files `upload.js` and `image-manipulation.js` in `extensions/upload/services/`.
 
 ```bash
-strapi-plugin-thumbor-image-formats create-overrides
+yarn strapi-plugin-thumbor-image-formats create-overrides
 
 > Copying upload.js to /usr/src/app/extensions/upload/services/upload.js
 > Copying image-manipulation.js to /usr/src/app/extensions/upload/services/image-manipulation.js
